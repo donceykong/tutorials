@@ -1,0 +1,167 @@
+{
+  "configById": {
+    "3D!4jhpt7y": {
+      "cameraState": {
+        "perspective": true,
+        "distance": 55.79019635016718,
+        "phi": 47.52006743955307,
+        "thetaOffset": 93.97791636096402,
+        "targetOffset": [
+          2.034747227966817,
+          -0.7883933131419449,
+          -1.1052731050737949e-16
+        ],
+        "target": [
+          0,
+          0,
+          0
+        ],
+        "targetOrientation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "fovy": 45,
+        "near": 0.5,
+        "far": 5000
+      },
+      "followMode": "follow-pose",
+      "followTf": "velodyne_frame",
+      "scene": {
+        "transforms": {
+          "showLabel": false
+        }
+      },
+      "transforms": {},
+      "topics": {
+        "/velodyne_pointcloud": {
+          "visible": true,
+          "colorField": "intensity",
+          "colorMode": "rgba-fields",
+          "colorMap": "turbo"
+        },
+        "/camera/image_00": {
+          "visible": true,
+          "frameLocked": true,
+          "cameraInfoTopic": "/camera/calibration",
+          "distance": 1,
+          "planarProjectionFactor": 0,
+          "color": "#ffffff"
+        },
+        "/camera/calibration": {
+          "visible": true
+        },
+        "/camera_00/image": {
+          "visible": true,
+          "frameLocked": true,
+          "cameraInfoTopic": "/camera_00/calibration",
+          "color": "#ffffff",
+          "distance": 4,
+          "planarProjectionFactor": 0
+        },
+        "/camera_00_semantic/image": {
+          "visible": true,
+          "frameLocked": true,
+          "cameraInfoTopic": "/camera_00_semantic/calibration",
+          "planarProjectionFactor": 0,
+          "color": "#ffffff",
+          "distance": 3
+        },
+        "/camera_01_semantic/calibration": {
+          "visible": true,
+          "planarProjectionFactor": 0,
+          "distance": 3
+        },
+        "/camera_01_semantic/image": {
+          "visible": true,
+          "frameLocked": true,
+          "cameraInfoTopic": "/camera_01_semantic/calibration",
+          "color": "#ffffff",
+          "distance": 3,
+          "planarProjectionFactor": 0
+        },
+        "/camera_00_semantic/calibration": {
+          "visible": true,
+          "distance": 3
+        },
+        "/camera_00/calibration": {
+          "visible": true,
+          "planarProjectionFactor": 0,
+          "distance": 4
+        },
+        "/camera_01/image": {
+          "visible": true,
+          "frameLocked": true,
+          "cameraInfoTopic": "/camera_01/calibration",
+          "planarProjectionFactor": 0,
+          "color": "#ffffff",
+          "distance": 4
+        },
+        "/camera_01/calibration": {
+          "visible": true,
+          "width": 0.01,
+          "distance": 4
+        },
+        "/velodyne_accum": {
+          "visible": true,
+          "colorField": "intensity",
+          "colorMode": "rgba-fields",
+          "colorMap": "turbo"
+        }
+      },
+      "layers": {
+        "6cc0fb1f-629a-4811-870b-f829d91ba6d4": {
+          "visible": true,
+          "frameLocked": true,
+          "label": "URDF",
+          "instanceId": "6cc0fb1f-629a-4811-870b-f829d91ba6d4",
+          "layerId": "foxglove.Urdf",
+          "sourceType": "filePath",
+          "url": "",
+          "filePath": "/home/donceykong/Desktop/Foxglove/tutorials/schemas_and_mcap_writer/description/urdf/waymo.urdf",
+          "parameter": "",
+          "topic": "",
+          "framePrefix": "",
+          "displayMode": "auto",
+          "fallbackColor": "#ffffff",
+          "order": 1
+        }
+      },
+      "publish": {
+        "type": "point",
+        "poseTopic": "/move_base_simple/goal",
+        "pointTopic": "/clicked_point",
+        "poseEstimateTopic": "/initialpose",
+        "poseEstimateXDeviation": 0.5,
+        "poseEstimateYDeviation": 0.5,
+        "poseEstimateThetaDeviation": 0.26179939
+      },
+      "imageMode": {}
+    },
+    "map!18i182l": {
+      "center": {
+        "lat": 49.01929631225929,
+        "lon": 8.447327613830568
+      },
+      "customTileUrl": "",
+      "disabledTopics": [],
+      "followTopic": "/LocationFix",
+      "layer": "map",
+      "topicColors": {},
+      "zoomLevel": 14,
+      "maxNativeZoom": 18
+    }
+  },
+  "globalVariables": {},
+  "userNodes": {},
+  "playbackConfig": {
+    "speed": 1
+  },
+  "layout": {
+    "first": "3D!4jhpt7y",
+    "second": "map!18i182l",
+    "direction": "row",
+    "splitPercentage": 73.91666666666666
+  }
+}
