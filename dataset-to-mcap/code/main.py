@@ -65,16 +65,14 @@ def tf_matrix_to_quaternion(tf_matrix):
 
 
 def convert_to_mcap(kitti360):
-    # frame_points_accum = []
-    # rgb_np_accum = []
+    frame_points_accum = np.empty((0, 4))  # Assuming points data has 4 columns
+    rgb_np_accum = np.empty((0, 3))  # Assuming RGB data has 3 columns
     with open(f"./kitti360_seq_{kitti360.seq}.mcap", "wb") as f, Writer(f) as writer:
         for frame_number, data_tag in tqdm(
             list(kitti360.data_timestamps.keys()), desc="Processing timestamps"
         ):
-            timestamp_tuple = kitti360.data_timestamps[(frame_number, data_tag)]
 
-            velo_to_map_tf_matrix = kitti360.velodyne_poses.get(frame_number)
-            write_tf_data(writer, timestamp_tuple, velo_to_map_tf_matrix)
+            timestamp_tuple = kitti360.data_timestamps[(frame_number, data_tag)]
 
             if data_tag == "lidar":
                 points = kitti360.get_velo_points(frame_number)
@@ -91,33 +89,35 @@ def convert_to_mcap(kitti360):
                     topic="/velodyne_pointcloud",
                 )
 
+                ###############
+                # TRANSFORM
+                ###############
+                velo_to_map_tf_matrix = kitti360.velodyne_poses.get(frame_number)
+                write_tf_data(writer, timestamp_tuple, velo_to_map_tf_matrix)
+
                 # ###############
                 # # ACCUM PONTS
                 # ###############
                 # # TF Points
                 # pose = kitti360.velodyne_poses.get(frame_number)
                 # transformed_points = kitti360.get_transformed_point_cloud(points, pose)
-                # downsampled_tf_points, downsampled_rgb = kitti360.downsample_pointcloud(
-                #     transformed_points, points_rgb, voxel_leafsize=0.25
-                # )
 
                 # # Append points and colors to the lists
-                # frame_points_accum.append(downsampled_tf_points)
-                # rgb_np_accum.append(downsampled_rgb)
+                # frame_points_accum = np.vstack([frame_points_accum, transformed_points])
+                # rgb_np_accum = np.vstack([rgb_np_accum, points_rgb])
 
                 # # Concatenate all accumulated points and colors
-                # if frame_points_accum:
-                #     concat_points = np.concatenate(frame_points_accum, axis=0)
-                #     concat_rgb = np.concatenate(rgb_np_accum, axis=0)
-
+                # if frame_points_accum.shape[0] > 0:
                 #     # Downsample points
                 #     downsampled_points_accum, downsampled_rgb_accum = (
                 #         kitti360.downsample_pointcloud(
-                #             concat_points,
-                #             concat_rgb,
-                #             voxel_leafsize=0.5,
+                #             frame_points_accum,
+                #             rgb_np_accum,
+                #             voxel_leafsize=1.0,
                 #         )
                 #     )
+                #     frame_points_accum = downsampled_points_accum
+                #     rgb_np_accum = downsampled_rgb_accum
 
                 #     # Write scan to mcap file
                 #     write_velo_to_mcap(
@@ -129,10 +129,12 @@ def convert_to_mcap(kitti360):
                 #         topic="/velodyne_accum",
                 #     )
 
-            # elif data_tag == "gps":
-            #     pose_lla = kitti360.velodyne_poses_latlon.get(frame_number)[:3]
-            #     gps_frame = "velodyne_gps_frame"
-            #     write_gps_to_mcap(writer, timestamp_tuple, pose_lla, gps_frame)
+            elif data_tag == "gps":
+                # Make a call to dict instead
+                pose_lla = kitti360.get_gps_pose(frame_number)
+                gps_frame = "velodyne_gps_frame"
+                write_gps_to_mcap(writer, timestamp_tuple, pose_lla, gps_frame)
+
             elif data_tag == "cam_00":
                 raw_frame_img, semantic_frame_img = kitti360.get_cam_images(
                     frame_number, camera_number=0
@@ -516,9 +518,9 @@ def write_tf_to_mcap(writer, timestamp_tuple, tf_matrix, parent_frame, child_fra
 
 
 def write_gps_to_mcap(writer, timestamp_tuple, pose_lla, gps_frame):
-    lat = pose_lla[1][3]
-    lon = pose_lla[0][3]
-    alt = pose_lla[2][3]
+    lat = pose_lla[0]
+    lon = pose_lla[1]
+    alt = pose_lla[2]
 
     nanoseconds, epoch_seconds = timestamp_tuple
 
@@ -540,8 +542,8 @@ def write_gps_to_mcap(writer, timestamp_tuple, pose_lla, gps_frame):
 
 def main():
     sequence = 0
-    minute_begin = 5
-    minute_end = 5.1
+    minute_begin = 2
+    minute_end = 5
     nanosec_begin = minutes_to_nanoseconds(minute_begin)
     nanosec_end = minutes_to_nanoseconds(minute_end)
     kitti360 = KITTI360(sequence, nanosec_begin, nanosec_end)

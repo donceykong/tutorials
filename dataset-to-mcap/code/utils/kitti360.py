@@ -4,7 +4,6 @@ import os
 import numpy as np
 import open3d as o3d
 from PIL import Image
-
 from utils.labels import labels
 
 
@@ -173,6 +172,7 @@ class KITTI360(FileOperations, PointCloudOperations):
         insert_timestamp_data(self.data_timestamps, self.velo_timestamp_file, "lidar")
         insert_timestamp_data(self.data_timestamps, self.cam_00_timestamps, "cam_00")
         insert_timestamp_data(self.data_timestamps, self.cam_01_timestamps, "cam_01")
+        insert_timestamp_data(self.data_timestamps, self.gps_timestamps, "gps")
 
         earliest_timestamp = np.inf
         for nanoseconds, epoch_seconds in self.data_timestamps.values():
@@ -193,21 +193,26 @@ class KITTI360(FileOperations, PointCloudOperations):
             nanoseconds, epoch_seconds = self.data_timestamps[(frame_number, data_tag)]
             current_timestamp = nanoseconds + seconds_to_nanoseconds(epoch_seconds)
 
-            velo_label_path = os.path.join(self.label_path, f"{frame_number:010d}.bin")
-            cam_00_semantic_frame_path = os.path.join(
+            velo_label_file = os.path.join(self.label_path, f"{frame_number:010d}.bin")
+            cam_00_semantic_img_file = os.path.join(
                 self.cam_00_semantic_images_path, f"{frame_number:010d}.png"
             )
-            cam_01_semantic_frame_path = os.path.join(
+            cam_01_semantic_img_file = os.path.join(
                 self.cam_01_semantic_images_path, f"{frame_number:010d}.png"
+            )
+            gps_pose_file = os.path.join(
+                self.gps_poses_path, f"{frame_number:010d}.txt"
             )
 
             semantics_file = None
             if data_tag == str("lidar"):
-                semantics_file = velo_label_path
+                semantics_file = velo_label_file
             elif data_tag == str("cam_00"):
-                semantics_file = cam_00_semantic_frame_path
+                semantics_file = cam_00_semantic_img_file
             elif data_tag == str("cam_01"):
-                semantics_file = cam_01_semantic_frame_path
+                semantics_file = cam_01_semantic_img_file
+            elif data_tag == str("gps"):
+                semantics_file = gps_pose_file
 
             if (
                 not os.path.exists(semantics_file)
@@ -245,6 +250,13 @@ class KITTI360(FileOperations, PointCloudOperations):
             imu_poses_xyz = self.read_poses(self.imu_poses_file)
             self.velodyne_poses = self.get_poses_lidar_from_imu(imu_poses_xyz)
             self.save_poses(self.velodyne_poses_file, self.velodyne_poses)
+
+    def get_gps_pose(self, frame):
+        gps_pose_file = os.path.join(self.gps_poses_path, f"{frame:010d}.txt")
+        with open(gps_pose_file, "r") as file:
+            first_line = file.readline().strip()
+            lat_lon_alt = np.array(first_line.split()[:3], dtype=np.float32)
+            return lat_lon_alt
 
     def get_velo_points(self, frame):
         raw_pc_frame_path = os.path.join(self.raw_pc_path, f"{frame:010d}.bin")
@@ -307,7 +319,7 @@ class KITTI360(FileOperations, PointCloudOperations):
             self.kitti360Path,
             "data_2d_semantics/train",
             sequence_dir,
-            "image_00/semantic_rgb",
+            "image_00/semantic_rgb/",
         )
         self.cam_01_timestamps = os.path.join(
             self.kitti360Path, "data_2d_raw", sequence_dir, "image_01/timestamps.txt"
@@ -320,4 +332,11 @@ class KITTI360(FileOperations, PointCloudOperations):
             "data_2d_semantics/train",
             sequence_dir,
             "image_01/semantic_rgb",
+        )
+
+        self.gps_poses_path = os.path.join(
+            self.kitti360Path, "data_poses", sequence_dir, "oxts/data/"
+        )
+        self.gps_timestamps = os.path.join(
+            self.kitti360Path, "data_poses", sequence_dir, "oxts/timestamps.txt"
         )
